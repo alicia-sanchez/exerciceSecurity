@@ -24,18 +24,20 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // encode the plain password
-            $user->setPassword(
-                $userPasswordHasher->hashPassword(
-                    $user,
-                    $form->get('plainPassword')->getData()
-                )
+
+            // Ajout du role
+            $user->setRoles(["ROLE_USER"]);
+            // Recuperation et hashage du mot de passe
+            $plainPassword =  $form->get('plainPassword')->getData();
+            // Mise a jour du mot de passe
+            $user->setPassword($userPasswordHasher->hashPassword($user,$plainPassword)
             );
 
+            //Persistence des données
             $entityManager->persist($user);
             $entityManager->flush();
-            // do anything else you need here, like send an email
 
+            // On identifie directement l'utilisateur apres l'inscription, choix dans la commande make:registration-form
             return $userAuthenticator->authenticateUser(
                 $user,
                 $authenticator,

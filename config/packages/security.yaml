@@ -5,22 +5,29 @@ security:
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         # used to reload user from session & other features (e.g. switch_user)
+        # La ou les entités qui seront ciblées pour l'authentification
         app_user_provider:
             entity:
                 class: App\Entity\User
+                # L'attribut qui sera testé avec le password
                 property: username
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
+            # Le provider a utilisé pour ce pare-feu
             provider: app_user_provider
+            # L'Authenticator qui nous permettra de nous connecter
+            # Contient l'url du login, méthodes pour l'authentification...
             custom_authenticator: App\Security\AppAuthenticator
+            # La route à utiliser pour le logout, présente comme app_login dans SecurityController
             logout:
                 path: app_logout
-                # where to redirect after logout
-                # target: app_any_route
+                # redirection au login par exemple
+                target: app_login
 
             remember_me:
                 secret: '%kernel.secret%'
@@ -37,6 +44,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        # Restriction des routes selon un ou plusieurs roles
+        # Attention à l'ordre, en général du moins au plus restrictif
+        - { path: ^/home, roles: [ROLE_ADMIN, ROLE_USER] }
         - { path: ^/admin, roles: ROLE_ADMIN }
 
 when@test:
